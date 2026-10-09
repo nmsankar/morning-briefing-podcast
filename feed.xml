@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Mani's Morning Briefing</title>
+    <link>https://nmsankar.github.io/morning-briefing-podcast/</link>
+    <atom:link href="https://nmsankar.github.io/morning-briefing-podcast/feed.xml" rel="self" type="application/rss+xml"/>
+    <description>A private daily morning news briefing for Mani Sankar: markets, AI and tech, startups and funding, India and world headlines.</description>
+    <language>en-in</language>
+    <lastBuildDate>Fri, 09 Oct 2026 09:37:29 +0530</lastBuildDate>
+    <itunes:author>Mani Sankar</itunes:author>
+    <itunes:owner><itunes:name>Mani Sankar</itunes:name></itunes:owner>
+    <itunes:summary>A private daily morning news briefing for Mani Sankar: markets, AI and tech, startups and funding, India and world headlines.</itunes:summary>
+    <itunes:image href="https://nmsankar.github.io/morning-briefing-podcast/cover.jpg"/>
+    <image><url>https://nmsankar.github.io/morning-briefing-podcast/cover.jpg</url><title>Mani's Morning Briefing</title><link>https://nmsankar.github.io/morning-briefing-podcast/</link></image>
+    <itunes:category text="News"/>
+    <itunes:explicit>false</itunes:explicit>
+    <itunes:type>episodic</itunes:type>
+    <itunes:block>Yes</itunes:block>
+    <item>
+      <title>Morning Briefing – 9 Oct 2026</title>
+      <description>Mani's morning news briefing for Friday, 09 October 2026.</description>
+      <itunes:summary>Mani's morning news briefing for Friday, 09 October 2026.</itunes:summary>
+      <enclosure url="https://nmsankar.github.io/morning-briefing-podcast/episodes/2026-10-09.mp3" length="3990848" type="audio/mpeg"/>
+      <guid isPermaLink="false">mani-morning-briefing-2026-10-09</guid>
+      <pubDate>Fri, 09 Oct 2026 07:00:00 +0530</pubDate>
+      <itunes:duration>00:08:19</itunes:duration>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>Morning Briefing – 8 Oct 2026</title>
+      <description>Mani's morning news briefing for Thursday, 08 October 2026.</description>
+      <itunes:summary>Mani's morning news briefing for Thursday, 08 October 2026.</itunes:summary>
+      <enclosure url="https://nmsankar.github.io/morning-briefing-podcast/episodes/2026-10-08.mp3" length="4917672" type="audio/mpeg"/>
+      <guid isPermaLink="false">mani-morning-briefing-2026-10-08</guid>
+      <pubDate>Thu, 08 Oct 2026 07:00:00 +0530</pubDate>
+      <itunes:duration>00:10:15</itunes:duration>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>Morning Briefing – 7 Oct 2026</title>
+      <description>Mani's morning news briefing for Wednesday, 07 October 2026.</description>
+      <itunes:summary>Mani's morning news briefing for Wednesday, 07 October 2026.</itunes:summary>
+      <enclosure url="https://nmsankar.github.io/morning-briefing-podcast/episodes/2026-10-07.mp3" length="4975978" type="audio/mpeg"/>
+      <guid isPermaLink="false">mani-morning-briefing-2026-10-07</guid>
+      <pubDate>Wed, 07 Oct 2026 07:00:00 +0530</pubDate>
+      <itunes:duration>00:10:22</itunes:duration>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+  </channel>
+</rss>
