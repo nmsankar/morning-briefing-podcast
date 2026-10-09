@@ -6,7 +6,7 @@
     <atom:link href="https://nmsankar.github.io/morning-briefing-podcast/feed.xml" rel="self" type="application/rss+xml"/>
     <description>A private daily morning news briefing for Mani Sankar: markets, AI and tech, startups and funding, India and world headlines.</description>
     <language>en-in</language>
-    <lastBuildDate>Fri, 09 Oct 2026 09:37:29 +0530</lastBuildDate>
+    <lastBuildDate>Fri, 09 Oct 2026 12:51:50 +0530</lastBuildDate>
     <itunes:author>Mani Sankar</itunes:author>
     <itunes:owner><itunes:name>Mani Sankar</itunes:name></itunes:owner>
     <itunes:summary>A private daily morning news briefing for Mani Sankar: markets, AI and tech, startups and funding, India and world headlines.</itunes:summary>
@@ -15,7 +15,7 @@
     <itunes:category text="News"/>
     <itunes:explicit>false</itunes:explicit>
     <itunes:type>episodic</itunes:type>
-    <itunes:block>Yes</itunes:block>
+
     <item>
       <title>Morning Briefing – 9 Oct 2026</title>
       <description>Mani's morning news briefing for Friday, 09 October 2026.</description>
