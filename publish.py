@@ -30,16 +30,50 @@ def run(cmd, **kw):
     return subprocess.run(cmd, check=True, text=True, capture_output=True, **kw)
 
 
-def tts(text, out_mp3, voice, rate):
+PIPER_VOICE = Path(os.environ.get("PODCAST_PIPER_VOICE",
+                   str(ROOT / "voices" / "en_US-lessac-medium.onnx")))
+
+
+def _edge_tts(text, tmp, voice, rate):
     import edge_tts
-    tmp = out_mp3.with_suffix(".raw.mp3")
     asyncio.run(edge_tts.Communicate(text, voice, rate=rate).save(str(tmp)))
+    if not tmp.exists() or tmp.stat().st_size < 1000:
+        raise RuntimeError("edge-tts produced no audio")
+
+
+def _piper_tts(text, tmp_wav):
+    """Offline fallback: local Piper neural TTS -> WAV."""
+    if not PIPER_VOICE.exists():
+        raise RuntimeError(f"Piper voice model missing: {PIPER_VOICE}")
+    piper = Path(sys.executable).with_name("piper")
+    cmd = [str(piper) if piper.exists() else "piper", "-m", str(PIPER_VOICE),
+           "-f", str(tmp_wav), "--sentence-silence", "0.3"]
+    subprocess.run(cmd, input=text, text=True, check=True, capture_output=True)
+    if not tmp_wav.exists() or tmp_wav.stat().st_size < 1000:
+        raise RuntimeError("piper produced no audio")
+
+
+def tts(text, out_mp3, voice, rate):
+    """Synthesize with edge-tts; on any failure fall back to offline Piper. Returns engine name."""
+    tmp = out_mp3.with_suffix(".raw.mp3")
+    engine = "edge-tts"
+    try:
+        _edge_tts(text, tmp, voice, rate)
+    except Exception as e:
+        print(f"edge-tts failed ({type(e).__name__}: {str(e)[:200]}); falling back to Piper",
+              file=sys.stderr)
+        tmp.unlink(missing_ok=True)
+        tmp = out_mp3.with_suffix(".raw.wav")
+        _piper_tts(text, tmp)
+        engine = f"piper ({PIPER_VOICE.stem})"
     # Re-encode to a standard podcast-friendly MP3 (44.1 kHz mono 64 kbps CBR) with ID3 tags.
     run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(tmp), "-ac", "1", "-ar", "44100",
          "-b:a", "64k", "-metadata", f"title={episode_title(out_mp3.stem)}",
          "-metadata", f"artist={AUTHOR}", "-metadata", f"album={TITLE}",
          "-id3v2_version", "3", str(out_mp3)])
     tmp.unlink()
+    print(f"TTS engine: {engine}")
+    return engine
 
 
 def duration_secs(mp3):
