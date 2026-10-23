@@ -6,7 +6,7 @@
     <atom:link href="https://nmsankar.github.io/morning-briefing-podcast/feed.xml" rel="self" type="application/rss+xml"/>
     <description>A private daily morning news briefing for Mani Sankar: markets, AI and tech, startups and funding, India and world headlines.</description>
     <language>en-in</language>
-    <lastBuildDate>Thu, 22 Oct 2026 07:05:47 +0530</lastBuildDate>
+    <lastBuildDate>Fri, 23 Oct 2026 07:09:09 +0530</lastBuildDate>
     <itunes:author>Mani Sankar</itunes:author>
     <itunes:owner><itunes:name>Mani Sankar</itunes:name></itunes:owner>
     <itunes:summary>A private daily morning news briefing for Mani Sankar: markets, AI and tech, startups and funding, India and world headlines.</itunes:summary>
@@ -16,6 +16,17 @@
     <itunes:explicit>false</itunes:explicit>
     <itunes:type>episodic</itunes:type>
 
+    <item>
+      <title>Morning Briefing – 23 Oct 2026</title>
+      <description>Mani's morning news briefing for Friday, 23 October 2026.</description>
+      <itunes:summary>Mani's morning news briefing for Friday, 23 October 2026.</itunes:summary>
+      <enclosure url="https://nmsankar.github.io/morning-briefing-podcast/episodes/2026-10-23.mp3" length="4837008" type="audio/mpeg"/>
+      <guid isPermaLink="false">mani-morning-briefing-2026-10-23</guid>
+      <pubDate>Fri, 23 Oct 2026 07:00:00 +0530</pubDate>
+      <itunes:duration>00:10:05</itunes:duration>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
     <item>
       <title>Morning Briefing – 22 Oct 2026</title>
       <description>Mani's morning news briefing for Thursday, 22 October 2026.</description>
