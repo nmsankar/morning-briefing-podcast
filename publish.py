@@ -4,6 +4,10 @@
 Usage:
   publish.py --date YYYY-MM-DD --script /path/to/script.txt [--voice en-IN-PrabhatNeural]
              [--no-push] [--force]
+  publish.py --date YYYY-MM-DD --slug catchup --title "Special title" --script f.txt
+             [--description "..."] [--pub-time HH:MM]
+             # extra (non-daily) episode: episodes/YYYY-MM-DD-<slug>.mp3 + .json sidecar;
+             # never touches the daily YYYY-MM-DD.mp3
   publish.py --feed-only [--no-push]      # just rebuild feed.xml (and push)
 
 Requires: edge-tts (in ./.venv), ffmpeg/ffprobe, git; for pushing, `gh auth login`
@@ -53,7 +57,7 @@ def _piper_tts(text, tmp_wav):
         raise RuntimeError("piper produced no audio")
 
 
-def tts(text, out_mp3, voice, rate):
+def tts(text, out_mp3, voice, rate, title=None):
     """Synthesize with edge-tts; on any failure fall back to offline Piper. Returns engine name."""
     tmp = out_mp3.with_suffix(".raw.mp3")
     engine = "edge-tts"
@@ -68,7 +72,7 @@ def tts(text, out_mp3, voice, rate):
         engine = f"piper ({PIPER_VOICE.stem})"
     # Re-encode to a standard podcast-friendly MP3 (44.1 kHz mono 64 kbps CBR) with ID3 tags.
     run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(tmp), "-ac", "1", "-ar", "44100",
-         "-b:a", "64k", "-metadata", f"title={episode_title(out_mp3.stem)}",
+         "-b:a", "64k", "-metadata", f"title={title or episode_title(out_mp3.stem)}",
          "-metadata", f"artist={AUTHOR}", "-metadata", f"album={TITLE}",
          "-id3v2_version", "3", str(out_mp3)])
     tmp.unlink()
@@ -91,22 +95,42 @@ def episode_title(date_str):
     return f"Morning Briefing – {d.day} {d.strftime('%b %Y')}"
 
 
-def build_feed():
-    eps = sorted(EP_DIR.glob("????-??-??.mp3"), reverse=True)
-    items = []
-    for mp3 in eps:
-        date = mp3.stem
-        d = dt.date.fromisoformat(date)
+def _episode_meta(mp3):
+    """Return (pub_datetime, title, summary, guid) for a daily or extra episode."""
+    stem = mp3.stem
+    date = stem[:10]
+    d = dt.date.fromisoformat(date)
+    if len(stem) == 10:  # daily episode: YYYY-MM-DD.mp3
         pub = dt.datetime(d.year, d.month, d.day, 7, 0, tzinfo=IST)
+        return (pub, episode_title(date),
+                f"Mani's morning news briefing for {d.strftime('%A, %d %B %Y')}.",
+                f"mani-morning-briefing-{date}")
+    # extra episode: YYYY-MM-DD-<slug>.mp3 with optional .json sidecar
+    meta = {}
+    side = mp3.with_suffix(".json")
+    if side.exists():
+        meta = json.loads(side.read_text(encoding="utf-8"))
+    hh, mm = (int(x) for x in meta.get("pub_time", "09:00").split(":"))
+    pub = dt.datetime(d.year, d.month, d.day, hh, mm, tzinfo=IST)
+    title = meta.get("title") or f"{TITLE} – {stem[11:]} – {d.day} {d.strftime('%b %Y')}"
+    summary = meta.get("description") or title
+    return pub, title, summary, f"mani-morning-briefing-{stem}"
+
+
+def build_feed():
+    eps = list(EP_DIR.glob("????-??-??.mp3")) + list(EP_DIR.glob("????-??-??-*.mp3"))
+    metas = sorted(((_episode_meta(m), m) for m in eps), key=lambda x: x[0][0], reverse=True)
+    eps = [m for _, m in metas]
+    items = []
+    for (pub, title, summary, guid), mp3 in metas:
         secs = duration_secs(mp3)
         url = f"{BASE_URL}/episodes/{mp3.name}"
-        summary = f"Mani's morning news briefing for {d.strftime('%A, %d %B %Y')}."
         items.append(f"""    <item>
-      <title>{escape(episode_title(date))}</title>
+      <title>{escape(title)}</title>
       <description>{escape(summary)}</description>
       <itunes:summary>{escape(summary)}</itunes:summary>
       <enclosure url="{escape(url)}" length="{mp3.stat().st_size}" type="audio/mpeg"/>
-      <guid isPermaLink="false">mani-morning-briefing-{date}</guid>
+      <guid isPermaLink="false">{escape(guid)}</guid>
       <pubDate>{email.utils.format_datetime(pub)}</pubDate>
       <itunes:duration>{fmt_dur(secs)}</itunes:duration>
       <itunes:episodeType>full</itunes:episodeType>
@@ -164,23 +188,39 @@ def main():
     ap.add_argument("--force", action="store_true", help="regenerate MP3 even if it exists")
     ap.add_argument("--feed-only", action="store_true")
     ap.add_argument("--no-push", action="store_true")
+    ap.add_argument("--slug", help="publish an extra episode as YYYY-MM-DD-<slug>.mp3 "
+                    "(does not replace the daily episode)")
+    ap.add_argument("--title", help="episode title (extra episodes)")
+    ap.add_argument("--description", help="episode description (extra episodes)")
+    ap.add_argument("--pub-time", default="09:00", help="HH:MM IST pubDate for extra episodes")
     a = ap.parse_args()
     EP_DIR.mkdir(exist_ok=True)
     if not a.feed_only:
         if not (a.date and a.script):
             ap.error("--date and --script are required (or use --feed-only)")
         dt.date.fromisoformat(a.date)
-        out = EP_DIR / f"{a.date}.mp3"
+        title = None
+        if a.slug:
+            import re
+            if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", a.slug):
+                ap.error("--slug must be lowercase letters, digits and hyphens")
+            out = EP_DIR / f"{a.date}-{a.slug}.mp3"
+            title = a.title or f"{TITLE} – {a.slug}"
+            out.with_suffix(".json").write_text(json.dumps(
+                {"title": title, "description": a.description or title,
+                 "pub_time": a.pub_time}, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        else:
+            out = EP_DIR / f"{a.date}.mp3"
         if a.force or not out.exists():
             text = Path(a.script).read_text(encoding="utf-8").strip()
-            tts(text, out, a.voice, a.rate)
+            tts(text, out, a.voice, a.rate, title)
         s = duration_secs(out)
         print(json.dumps({"date": a.date, "mp3": str(out), "bytes": out.stat().st_size,
                           "duration": fmt_dur(s)}))
     eps = build_feed()
     print(f"feed.xml rebuilt with {len(eps)} episode(s)")
     if not a.no_push:
-        push(f"Episode {a.date}" if a.date else "Rebuild feed")
+        push((f"Episode {a.date}" + (f" ({a.slug})" if a.slug else "")) if a.date else "Rebuild feed")
 
 
 if __name__ == "__main__":
